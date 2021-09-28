@@ -1,10 +1,4 @@
-#!/usr/bin/env python
 """This script will display information about failing tests given a push.
-
-Usage:
-
-    $ pip install -r requirements.txt
-    $ ./dump-failures try <revision>
 
 To automatically open failures in vim you can set:
 
@@ -15,8 +9,6 @@ import json
 import os
 import shlex
 import subprocess
-import sys
-from argparse import ArgumentParser
 from collections import defaultdict
 
 from mozci.util.logging import logger
@@ -111,20 +103,3 @@ def dump_failures(branch, rev):
                     )
                 )
                 subprocess.run(cmd)
-
-
-def cli(args=sys.argv[1:]):
-    parser = ArgumentParser()
-    parser.add_argument("branch", help="Branch of push")
-    parser.add_argument("rev", help="Head revision of push")
-    args = parser.parse_args(args)
-
-    dump_failures(
-        args.branch,
-        args.rev,
-    )
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(cli())

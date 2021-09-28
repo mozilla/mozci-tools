@@ -1,14 +1,10 @@
-#!/usr/bin/env python
-
 """
 This script automates the process of filing bugs for tests skipped due to new
 or migrating platforms.
 
 It requires a bit of setup to use:
 
-1. Run `pip install -r requirements.txt` (preferably in a virutalenv)
-
-2. Ensure you can login via the bugzilla client. First add:
+1. Ensure you can login via the bugzilla client. First add:
 
     [DEFAULT]
     url = https://bugzilla.mozilla.org
@@ -21,26 +17,26 @@ your Bugzilla profile and paste it into the prompt you get from:
 If you'd like to test the tool out, use `https://bugzilla.allizom.org` as the
 url instead and request a test account from #bmo in slack.
 
-3. Set the `GECKO` environment variable to your mozilla-central clone.
+2. Set the `GECKO` environment variable to your mozilla-central clone.
 
-4. Craft the patch that disables tests. You can optionally use `{bug}` as a
-placeholder for the bug id, or {reason} as a placeholder for the reason string.
+3. Craft the patch that disables tests. You can optionally use `{{bug}}` as a
+placeholder for the bug id, or {{reason}} as a placeholder for the reason string.
 E.g:
 
     skip-if =
-      os == "linux" && debug  # {bug} - {reason}
+      os == "linux" && debug  # {{bug}} - {{reason}}
 
 
-5. Export the patch to a file:
+4. Export the patch to a file:
 
     $ hg export . > orig.patch
 
-6. Run the tool. You'll need to supply the patch file, a reason string and an
+5. Run the tool. You'll need to supply the patch file, a reason string and an
 optional try url. Also consider redirecting the output to a new file:
 
     $ ./test-triage-bug-filer path/to/orig.patch "new platform triage for foo" --try-url <try push url> > new.patch
 
-7. Import the new patch and prune the old one:
+6. Import the new patch and prune the old one:
 
     $ hg import new.patch
     $ hg prune -r <old revision>
@@ -59,9 +55,6 @@ import bugzilla
 from unidiff import PatchSet
 
 bzapi = bugzilla.Bugzilla("https://bugzilla.mozilla.org")
-if not bzapi.logged_in:
-    bzapi.interactive_login()
-
 
 BUG_SUMMARY_TEMPLATE = "Tests skipped in '{path}' for {reason}"
 BUG_DESCRIPTION_TEMPLATE = """
@@ -182,6 +175,9 @@ The following bug would be filed:
 def process_diff(
     diff: str, reason: str, depends_on: str, try_url: str = "", dry_run: bool = False
 ):
+    if not bzapi.logged_in:
+        bzapi.interactive_login()
+
     try_url = try_url or ""
 
     patch = PatchSet.from_filename(diff, encoding="utf-8")
@@ -227,35 +223,3 @@ def process_diff(
 
     if not dry_run:
         print(patch)
-
-
-def cli(args=sys.argv[1:]):
-    parser = ArgumentParser()
-    parser.add_argument("diff", help="Path to diff that skips tests")
-    parser.add_argument("--reason", help="Reason tests are being skipped")
-    parser.add_argument(
-        "--bug-id", help="Bugzilla ID of the bug that will be landing the changes."
-    )
-    parser.add_argument(
-        "--try-url", default=None, help="URL to try push demonstrating failures"
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        default=False,
-        help="Don't submit bugs, instead print a string representation",
-    )
-    args = parser.parse_args(args)
-
-    process_diff(
-        args.diff,
-        args.reason,
-        args.bug_id,
-        try_url=args.try_url,
-        dry_run=args.dry_run,
-    )
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(cli())
