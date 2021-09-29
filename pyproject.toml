@@ -24,7 +24,7 @@ pytest = "^6.2.5"
 pre-commit = "^2.15.0"
 
 [tool.poetry.scripts]
-citools = 'citools.console:cli'
+citools = 'citools.console.application:cli'
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
