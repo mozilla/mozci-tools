@@ -40,15 +40,14 @@ optional try url. Also consider redirecting the output to a new file:
 
     $ hg import new.patch
     $ hg prune -r <old revision>
-"""
+"""  # noqa: E501
 
 
 import json
-import traceback
 import os
 import subprocess
 import sys
-from argparse import ArgumentParser
+import traceback
 from itertools import chain
 
 import bugzilla
@@ -77,7 +76,7 @@ annotation was made.
 
 If you believe this is the case here, please feel free to remove the
 annotation. Sorry for the inconvenience and thanks for understanding.
-""".lstrip()
+""".lstrip()  # noqa: E501
 
 TRY_BLURB_TEMPLATE = """
 {try_url}
@@ -89,7 +88,7 @@ $ ./mach try fuzzy --rebuild 3 {path}
 
 Finally use the [fuzzy interface](https://firefox-source-docs.mozilla.org/tools/try/selectors/fuzzy.html) to select the task(s) which are relevant to the
 `skip-if` expression(s).
-"""
+"""  # noqa: E501
 
 TRY_URL_TEMPLATE = """
 See this [try push]({try_url}) for failures. If failures are missing, they were
@@ -167,7 +166,7 @@ The following bug would be filed:
         bug = bzapi.createbug(createinfo)
         print(bug.weburl, file=sys.stderr)
         return bug.id
-    except:
+    except Exception:
         print("Failed to create bug:", file=sys.stderr)
         print(traceback.format_exc(), file=sys.stderr)
 
@@ -202,7 +201,9 @@ def process_diff(
             url = TRY_URL_TEMPLATE.format(
                 try_url=f"{try_url}&test_paths={manifest.path}"
             )
-        try_blurb = TRY_BLURB_TEMPLATE.format(path=manifest.path, try_url=url, bug_id=depends_on)
+        try_blurb = TRY_BLURB_TEMPLATE.format(
+            path=manifest.path, try_url=url, bug_id=depends_on
+        )
         description = BUG_DESCRIPTION_TEMPLATE.format(
             path=manifest.path,
             reason=reason,

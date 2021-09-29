@@ -3,19 +3,22 @@
 To automatically open failures in vim you can set:
 
     $ export DUMP_FAILURES_EDIT_COMMAND="vim +/{test} +:vnew +':let f=append(1,{context})' /path/to/mozilla-central/{manifest}"
-"""
+"""  # noqa: E501
 
 import json
 import os
 import shlex
 import subprocess
 from collections import defaultdict
+from typing import Dict, List
 
-from mozci.util.logging import logger
 from mozci.push import Push
 from mozci.task import TestTask
+from mozci.util.logging import logger
 
-RESULTS = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: [0, 0])))
+RESULTS: Dict[str, Dict[str, Dict[str, List[int]]]] = defaultdict(
+    lambda: defaultdict(lambda: defaultdict(lambda: [0, 0]))
+)
 
 
 def update_results(task):
@@ -39,10 +42,9 @@ def update_results(task):
 
         test = data["test"]
 
-        if (
-            task.classification == "not classified"
-            and (data["action"] == "crash"
-            or ("expected" in data and data["status"] != data["expected"]))
+        if task.classification == "not classified" and (
+            data["action"] == "crash"
+            or ("expected" in data and data["status"] != data["expected"])
         ):
             status[test] |= 1
 
@@ -94,7 +96,7 @@ def dump_failures(branch, rev):
 
             if "DUMP_FAILURES_EDIT_COMMAND" in os.environ:
                 context.insert(0, test)
-                context = [l.strip() for l in context]
+                context = [line.strip() for line in context]
                 context = '","'.join(context)
                 context = f'["{context}"]'
                 cmd = shlex.split(
