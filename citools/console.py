@@ -20,7 +20,7 @@ class PushFailuresCommand(Command):
         )
 
 
-class PushCommand(Command):
+class PushCommands(Command):
     """
     Contains commands that operate on a single push.
 
@@ -59,10 +59,23 @@ class FileBugsCommand(Command):
         )
 
 
+class MigrationCommands(Command):
+    """
+    Contains commands related to performing test migrations.
+
+    migration
+    """
+
+    commands = [FileBugsCommand()]
+
+    def handle(self):
+        return self.call("help", self._config.name)
+
+
 def cli():
     application = Application()
-    application.add(PushCommand())
-    application.add(FileBugsCommand())
+    application.add(PushCommands())
+    application.add(MigrationCommands())
     application.run()
 
 
