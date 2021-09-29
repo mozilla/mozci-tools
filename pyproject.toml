@@ -17,6 +17,8 @@ unidiff = "^0.7.0"
 cleo = "^0.8.1"
 
 [tool.poetry.dev-dependencies]
+tox = "^3.24.4"
+pytest = "^6.2.5"
 
 [tool.poetry.scripts]
 tmtools = 'tmtools.console:cli'
