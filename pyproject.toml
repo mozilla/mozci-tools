@@ -1,13 +1,15 @@
 [tool.poetry]
-name = "test-management-tools"
+name = "mozci-tools"
 version = "0.1.0"
-description = "A suite of tools to assist with test migrations in Firefox's CI"
-authors = ["Your Name <you@example.com>"]
+description = "A suite of high-level commandline tools to assist with Firefox's CI"
+authors = [
+    "Andrew Halberstadt <ahal@mozilla.com>",
+    "Joel Maher <jmaher@mozilla.com>",
+]
 license = "MPL-2.0"
 packages = [
-  { include = "tmtools" },
+  { include = "citools" },
 ]
-
 
 [tool.poetry.dependencies]
 python = "^3.7"
@@ -22,7 +24,7 @@ pytest = "^6.2.5"
 pre-commit = "^2.15.0"
 
 [tool.poetry.scripts]
-tmtools = 'tmtools.console:cli'
+citools = 'citools.console:cli'
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
