@@ -2,8 +2,8 @@ import sys
 
 from cleo import Application, Command
 
-from tmtools import test_triage_bug_filer
-from tmtools.dump_failures import dump_failures
+from citools import test_triage_bug_filer
+from citools.dump_failures import dump_failures
 
 
 class PushFailuresCommand(Command):
@@ -12,6 +12,7 @@ class PushFailuresCommand(Command):
 
     failures
     """
+
     def handle(self):
         dump_failures(
             self.argument("branch"),
@@ -27,6 +28,7 @@ class PushCommand(Command):
         {branch : Branch the push belongs to (e.g autoland, try, etc).}
         {rev : Head revision of the push.}
     """
+
     commands = [PushFailuresCommand()]
 
     def handle(self):
@@ -44,6 +46,7 @@ class FileBugsCommand(Command):
         {--try-url= : URL to try push demonstrating failures.}
         {--dry-run : Don't submit bugs, instead print a string representation.}
     """
+
     help = test_triage_bug_filer.__doc__
 
     def handle(self):
@@ -63,5 +66,5 @@ def cli():
     application.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(cli())
