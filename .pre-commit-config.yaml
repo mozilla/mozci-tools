@@ -55,6 +55,7 @@ repos:
     rev: v0.910
     hooks:
       - id: mypy
+        exclude: ^docs/
   - repo: meta
     hooks:
       - id: check-useless-excludes
