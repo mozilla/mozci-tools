@@ -22,7 +22,10 @@ RESULTS: Dict[str, Dict[str, Dict[str, List[int]]]] = defaultdict(
 
 
 def update_results(task):
-    raw_log_path = [a for a in task.artifacts if a.endswith("raw.log")][0]
+    raw_log_path_list = [a for a in task.artifacts if a.endswith("raw.log")]
+    if not raw_log_path_list:
+        return
+    raw_log_path = raw_log_path_list[0]
     raw_log = task.get_artifact(raw_log_path).text
     manifests = {}
     status = defaultdict(int)
