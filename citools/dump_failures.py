@@ -73,26 +73,16 @@ def dump_failures(branch, rev):
         logger.info(f"processing {task.label}")
         update_results(task)
 
-    for manifest, tests in RESULTS.items():
-        manifest_printed = False
+    summary_dict = summarize_failures()
 
-        for test, tasks in tests.items():
-            if not any(r[1] for r in tasks.values()):
-                continue
+    for manifest, tests in summary_dict.items():
+        print("\n" + manifest)
+        print()
 
-            if not manifest_printed:
-                print("\n" + manifest)
-                manifest_printed = True
-
+        for test, context in tests.items():
             print()
             print(f"  {test}")
-            context = []
-            for label, result in tasks.items():
-                if not result[1]:
-                    continue
-                s = f"    {label}: {result[1]} / {result[0] + result[1]} failed"
-                context.append(s)
-                print(s)
+            print(context)
 
             if manifest in ("dom/canvas/test/mochitest.ini",):
                 continue
@@ -108,3 +98,23 @@ def dump_failures(branch, rev):
                     )
                 )
                 subprocess.run(cmd)
+
+
+def summarize_failures():
+    summary_dict = {}
+    for manifest, tests in RESULTS.items():
+        summary_dict[manifest] = {}
+        for test, tasks in tests.items():
+            summary_dict[manifest][test] = []
+            if not any(r[1] for r in tasks.values()):
+                continue
+
+            context = []
+            for label, result in tasks.items():
+                if not result[1]:
+                    continue
+                s = f"    {label}: {result[1]} / {result[0] + result[1]} failed"
+                context.append(s)
+            summary_dict[manifest][test] = context
+
+    return summary_dict
