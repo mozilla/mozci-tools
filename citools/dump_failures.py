@@ -4,7 +4,7 @@ To automatically open failures in vim you can set:
 
     $ export DUMP_FAILURES_EDIT_COMMAND="vim +/{test} +:vnew +':let f=append(1,{context})' /path/to/mozilla-central/{manifest}"
 """  # noqa: E501
-
+import configparser
 import json
 import os
 import shlex
@@ -19,6 +19,14 @@ from mozci.util.logging import logger
 RESULTS: Dict[str, Dict[str, Dict[str, List[int]]]] = defaultdict(
     lambda: defaultdict(lambda: defaultdict(lambda: [0, 0]))
 )
+SKIPPED_MANIFESTS = []
+
+
+def red_file_ini():
+    file_config = configparser.configparser()
+    file_config.read("dom/canvas/test/mochitest.ini")
+    for test in file_config.sections():
+        SKIPPED_MANIFESTS.append(test)
 
 
 def update_results(task):
@@ -94,8 +102,8 @@ def dump_failures(branch, rev):
                 context.append(s)
                 print(s)
 
-            if manifest in ("dom/canvas/test/mochitest.ini",):
-                continue
+            if manifest in SKIPPED_MANIFESTS:
+                print(f"This output is not support yet: {manifest}")
 
             if "DUMP_FAILURES_EDIT_COMMAND" in os.environ:
                 context.insert(0, test)
