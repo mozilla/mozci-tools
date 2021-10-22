@@ -4,9 +4,10 @@ To automatically open failures in vim you can set:
 
     $ export DUMP_FAILURES_EDIT_COMMAND="vim +/{test} +:vnew +':let f=append(1,{context})' /path/to/mozilla-central/{manifest}"
 """  # noqa: E501
-import configparser
+
 import json
 import os
+import pathlib
 import shlex
 import subprocess
 from collections import defaultdict
@@ -22,11 +23,11 @@ RESULTS: Dict[str, Dict[str, Dict[str, List[int]]]] = defaultdict(
 SKIPPED_MANIFESTS = []
 
 
-def red_file_ini():
-    file_config = configparser.configparser()
-    file_config.read("dom/canvas/test/mochitest.ini")
-    for test in file_config.sections():
-        SKIPPED_MANIFESTS.append(test)
+def update_skipped_manifest():
+    path_list = pathlib.Path("dom/canvas/test").glob("**/*.ini")
+    for skip_manifest in path_list:
+        if skip_manifest.name == "mochitest.ini":
+            SKIPPED_MANIFESTS.append(skip_manifest)
 
 
 def update_results(task):
