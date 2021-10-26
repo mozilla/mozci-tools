@@ -29,7 +29,11 @@ class ClassifyCommand(Command):
 
     def handle(self):
         push = Push(self.argument("rev"), self.argument("branch"))
-        print(push.classify())
+        classification = push.classify()
+        self.line(
+            f'Push associated with the head revision {self.argument("rev")} on the branch '
+            f'{self.argument("branch")} is classified as {classification.name}'
+        )
 
 
 class PushCommands(Command):
