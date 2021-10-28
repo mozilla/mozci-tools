@@ -33,6 +33,10 @@ def update_results(task):
     for line in raw_log.splitlines():
         data = json.loads(line)
         if data["action"] == "suite_start":
+            # When empty, data["tests"] is a list and not a dictionary
+            # More context: https://github.com/mozilla/mozci-tools/issues/27
+            if "tests" not in data or type(data["tests"]) is not dict:
+                continue
             for manifest, tests in data["tests"].items():
                 for t in tests:
                     manifests[t] = manifest
