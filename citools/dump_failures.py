@@ -56,7 +56,10 @@ def update_results(task):
                 manifest = manifests[test]
             except KeyError:
                 try:
-                    manifest = manifests[f"browser/{test}"]
+                    if data["source"] == "web-platform-tests":
+                        manifest = f"testing/web-platform/meta/{test}.ini"
+                    else:
+                        manifest = manifests[f"browser/{test}"]
                 except KeyError:
                     logger.warning(f"Invalid test: {test}")
                     continue
