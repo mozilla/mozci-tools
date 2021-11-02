@@ -20,14 +20,22 @@ from mozci.util.logging import logger
 RESULTS: Dict[str, Dict[str, Dict[str, List[int]]]] = defaultdict(
     lambda: defaultdict(lambda: defaultdict(lambda: [0, 0]))
 )
+
 SKIPPED_MANIFESTS = []
 
 
-def update_skipped_manifest():
-    path_list = pathlib.Path("dom/canvas/test").glob("**/*.ini")
-    for skip_manifest in path_list:
-        if skip_manifest.name == "mochitest.ini":
-            SKIPPED_MANIFESTS.append(skip_manifest)
+def find_related_manifest(path):
+    try:
+        # make absolute path in case this has symlinks
+        path_absolute = pathlib.Path(path).resolve(strict=True).parent
+        SKIPPED_MANIFESTS.append(
+            found_manifest
+            for found_manifest in pathlib.Path(path_absolute).glob("**/*.ini")
+        )
+    except FileNotFoundError:
+        SKIPPED_MANIFESTS.append(path)
+    except RuntimeError:
+        SKIPPED_MANIFESTS.append(path)
 
 
 def update_results(task):
@@ -104,7 +112,7 @@ def dump_failures(branch, rev):
                 print(s)
 
             if manifest in SKIPPED_MANIFESTS:
-                print(f"This output is not support yet: {manifest}")
+                print(f" This: {manifest} has exceptions that are not supported yet")
 
             if "DUMP_FAILURES_EDIT_COMMAND" in os.environ:
                 context.insert(0, test)
