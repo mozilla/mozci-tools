@@ -7,6 +7,7 @@ To automatically open failures in vim you can set:
 
 import json
 import os
+import pathlib
 import shlex
 import subprocess
 from collections import defaultdict
@@ -19,6 +20,24 @@ from mozci.util.logging import logger
 RESULTS: Dict[str, Dict[str, Dict[str, List[int]]]] = defaultdict(
     lambda: defaultdict(lambda: defaultdict(lambda: [0, 0]))
 )
+
+
+def find_related_manifest(path):
+    found_paths = [path]
+    try:
+        # make absolute path in case this has symlinks
+        path_absolute = pathlib.Path(path).resolve(strict=True).parent
+        for found_manifest in pathlib.Path(path_absolute).glob("**/*.ini"):
+            if found_manifest not in found_paths:
+                found_paths.append(str(found_manifest))
+    except FileNotFoundError:
+        return found_paths
+    except RuntimeError:
+        return found_paths
+    return found_paths
+
+
+SKIPPED_MANIFESTS = find_related_manifest("dom/canvas/mochistest.ini")
 
 
 def update_results(task):
@@ -91,8 +110,8 @@ def dump_failures(branch, rev):
             print(f"  {test}")
             print(context)
 
-            if manifest in ("dom/canvas/test/mochitest.ini",):
-                continue
+            if manifest in SKIPPED_MANIFESTS:
+                print(f" This: {manifest} has exceptions that are not supported yet")
 
             if "DUMP_FAILURES_EDIT_COMMAND" in os.environ:
                 context.insert(0, test)
