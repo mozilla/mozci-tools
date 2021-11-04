@@ -12,7 +12,7 @@ It requires a bit of setup to use:
 to ~/.config/python-bugzilla/bugzillarc. Next generate a new API key from
 your Bugzilla profile and paste it into the prompt you get from:
 
-    $ bugzilla login --api-key`.
+    $ bugzilla login --api-key
 
 If you'd like to test the tool out, use `https://bugzilla.allizom.org` as the
 url instead and request a test account from #bmo in slack.
