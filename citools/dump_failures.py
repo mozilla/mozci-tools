@@ -21,6 +21,8 @@ RESULTS: Dict[str, Dict[str, Dict[str, List[int]]]] = defaultdict(
     lambda: defaultdict(lambda: defaultdict(lambda: [0, 0]))
 )
 
+REGRESSIONS: Dict[str, str] = defaultdict()
+
 
 def find_related_manifest(path):
     found_paths = [path]
@@ -94,6 +96,10 @@ def update_results(task):
 
 def dump_failures(branch, rev):
     push = Push(rev, branch)
+    push_status, regressions = push.classify()
+
+    process_regressions(regressions)
+
     tasks = [t for t in push.tasks if isinstance(t, TestTask)]
     for task in tasks:
         logger.info(f"processing {task.label}")
@@ -102,13 +108,14 @@ def dump_failures(branch, rev):
     summary_dict = summarize_failures()
 
     for manifest, tests in summary_dict.items():
-        print("\n" + manifest)
-        print()
+        if manifest in REGRESSIONS:
+            line = REGRESSIONS[manifest]
+            print("\n" + manifest + " Regressions class: " + line)
 
         for test, context in tests.items():
-            print()
             print(f"  {test}")
-            print(context)
+            if context:
+                print(context)
 
             if manifest in SKIPPED_MANIFESTS:
                 print(f" This: {manifest} has exceptions that are not supported yet")
@@ -144,3 +151,15 @@ def summarize_failures():
             summary_dict[manifest][test] = context
 
     return summary_dict
+
+
+def process_regressions_helper(regressions, regression_class):
+    # get each manifest in the regressions
+    for manifest in regressions:
+        REGRESSIONS[manifest] = regression_class
+
+
+def process_regressions(regressions):
+    process_regressions_helper(regressions.real, "real")
+    process_regressions_helper(regressions.unknown, "unknown")
+    print("REGRESSIONS: ", REGRESSIONS)
