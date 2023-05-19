@@ -1,16 +1,13 @@
 import os
 import subprocess
 
-from cleo import Command
+from cleo.commands.command import Command
 from mozci.configuration import config
 
 
 class ConfigCommand(Command):
-    """
-    Open your mozci configuration file in an editor.
-
-    config
-    """
+    name = "config"
+    description = "Open your mozci configuration file in an editor."
 
     def handle(self):
         path = config.path

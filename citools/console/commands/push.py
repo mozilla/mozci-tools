@@ -1,32 +1,28 @@
-from cleo import Command
+from cleo.commands.command import Command
+from cleo.helpers import argument, option
 
 from citools.dump_failures import dump_failures
 
 
-class PushFailuresCommand(Command):
-    """
-    Display failing tests for a given push.
+class PushCommand(Command):
+    arguments = [
+        argument(
+            "branch",
+            description="Push branch."
+        ),
+        argument(
+            "rev",
+            description="Push revision."
+        ),
+    ]
 
-    failures
-    """
+
+class PushFailuresCommand(PushCommand):
+    name = "push failures"
+    description = "Display failing tests for a given push."
 
     def handle(self):
         dump_failures(
             self.argument("branch"),
             self.argument("rev"),
         )
-
-
-class PushCommands(Command):
-    """
-    Contains commands that operate on a single push.
-
-    push
-        {branch : Branch the push belongs to (e.g autoland, try, etc).}
-        {rev : Head revision of the push.}
-    """
-
-    commands = [PushFailuresCommand()]
-
-    def handle(self):
-        return self.call("help", self._config.name)

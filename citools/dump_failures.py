@@ -43,52 +43,29 @@ SKIPPED_MANIFESTS = find_related_manifest("dom/canvas/mochistest.ini")
 
 
 def update_results(task):
-    raw_log_path_list = [a for a in task.artifacts if a.endswith("raw.log")]
-    if not raw_log_path_list:
+    log_path_list = [a for a in task.artifacts if a.endswith("errorsummary.log")]
+    if not log_path_list:
         return
-    raw_log_path = raw_log_path_list[0]
-    raw_log = task.get_artifact(raw_log_path).text
-    manifests = {}
+    log_path = log_path_list[0]
+    log = task.get_artifact(log_path).text
     status = defaultdict(int)
     seen = set()
-    for line in raw_log.splitlines():
+    for line in log.splitlines():
         data = json.loads(line)
-        if data["action"] == "suite_start":
-            # When empty, data["tests"] is a list and not a dictionary
-            # More context: https://github.com/mozilla/mozci-tools/issues/27
-            if "tests" not in data or type(data["tests"]) is not dict:
-                continue
-            for manifest, tests in data["tests"].items():
-                for t in tests:
-                    manifests[t] = manifest
 
         if (
-            data["action"] not in ("test_status", "test_end", "crash")
+            data["action"] not in ("test_result", "crash")
             or "test" not in data
         ):
             continue
 
         test = data["test"]
 
-        if task.classification == "not classified" and (
-            data["action"] == "crash"
-            or ("expected" in data and data["status"] != data["expected"])
-        ):
+        if task.classification == "not classified":
             status[test] |= 1
 
         if test not in seen and data["action"] in ("crash", "test_end"):
-            try:
-                manifest = manifests[test]
-            except KeyError:
-                try:
-                    if data["source"] == "web-platform-tests":
-                        manifest = f"testing/web-platform/meta/{test}.ini"
-                    else:
-                        manifest = manifests[f"browser/{test}"]
-                except KeyError:
-                    logger.warning(f"Invalid test: {test}")
-                    continue
-
+            manifest = data["group"]
             seen.add(test)
             result = RESULTS[manifest][test][task.label]
             result[status[test]] += 1
@@ -96,7 +73,7 @@ def update_results(task):
 
 def dump_failures(branch, rev):
     push = Push(rev, branch)
-    push_status, regressions = push.classify()
+    push_status, regressions, action = push.classify()
 
     process_regressions(regressions)
 
@@ -160,6 +137,7 @@ def process_regressions_helper(regressions, regression_class):
 
 
 def process_regressions(regressions):
+    print(regressions)
     process_regressions_helper(regressions.real, "real")
     process_regressions_helper(regressions.unknown, "unknown")
     print("REGRESSIONS: ", REGRESSIONS)

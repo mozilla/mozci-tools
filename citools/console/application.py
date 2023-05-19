@@ -1,16 +1,16 @@
 import sys
 
-from cleo import Application
+from cleo.application import Application
 
 from citools.console.commands.config import ConfigCommand
-from citools.console.commands.migration import MigrationCommands
-from citools.console.commands.push import PushCommands
+from citools.console.commands.migration import FileBugsCommand
+from citools.console.commands.push import PushFailuresCommand
 
 
 def cli():
     application = Application()
-    application.add(PushCommands())
-    application.add(MigrationCommands())
+    application.add(PushFailuresCommand())
+    application.add(FileBugsCommand())
     application.add(ConfigCommand())
     application.run()
 
