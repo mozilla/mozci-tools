@@ -13,8 +13,8 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
-mozci = "^2.3.0"
-# mozci = { path = "../mozci", develop = true, extras = ["cache"] }
+mozci = "^2.3"
+#mozci = { path = "../mozci", develop = true, extras = ["cache"] }
 python-bugzilla = "^3.2"
 unidiff = "^0.7"
 cleo = "^2.0.1"
